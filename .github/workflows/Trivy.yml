@@ -1,0 +1,36 @@
+name: Container Scanning - Trivy
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/*'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  trivy-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Set up Trivy
+        uses: aquasecurity/trivy-action@v0.3.0
+        with:
+          image-ref: 'your-docker-image:tag'  # Replace with your image name and tag, e.g., 'your-image:latest'
+
+      - name: Run Trivy scan on Docker image
+        run: |
+          trivy image --no-progress --exit-code 1 --severity HIGH,CRITICAL your-docker-image:tag  # Replace with your image name and tag
+          
+      - name: Upload Trivy scan results
+        uses: actions/upload-artifact@v2
+        with:
+          name: trivy-scan-report
+          path: trivy-report.json
